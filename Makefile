@@ -1,7 +1,7 @@
 EXEC = doom.out
 
 CC = gcc
-CFLAGS = -I${PONG_INCLUDES}
+CFLAGS = -I${PONG_INCLUDES} -lSDL2
 
 PONG_INCLUDES = src/include/
 SRCS = ${wildcard ./src/*.c}
