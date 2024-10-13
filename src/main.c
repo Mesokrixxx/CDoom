@@ -166,6 +166,8 @@ int main(int argc, char *argv[]) {
     state.camera.dir = normalize(((Vec2) {-1.0f, 0.1f}));
     state.camera.plane = (Vec2) {0.0f, 0.66f};
 
+    int mousex, mousey;
+    SDL_ShowCursor(false);
     while (!state.quit) {
         SDL_Event ev;
         while (SDL_PollEvent(&ev)) {
@@ -178,24 +180,32 @@ int main(int argc, char *argv[]) {
 
         const f32
             rotspeed = 1.5f * 0.016f,
-            movespeed = 1.5f * 0.016f;
+            movespeed = 1.0f * 0.016f;
 
         const u8 *keystate = SDL_GetKeyboardState(NULL);
         
-        if (keystate[SDL_SCANCODE_LEFT])
+        SDL_GetMouseState(&mousex, &mousey);
+
+        if (mousex < 1280 / 2)
             rotate(+rotspeed);
         
-        if (keystate[SDL_SCANCODE_RIGHT])
+        if (mousex > 1280 / 2)
             rotate(-rotspeed);
         
-        if (keystate[SDL_SCANCODE_UP]) {
+        SDL_WarpMouseInWindow(state.window, 1280 / 2, 720 / 2);
+
+        if (keystate[SDL_SCANCODE_W]) {
             state.camera.pos.x += state.camera.dir.x * movespeed;
             state.camera.pos.y += state.camera.dir.y * movespeed;
         }
         
-        if (keystate[SDL_SCANCODE_DOWN]) {
+        if (keystate[SDL_SCANCODE_S]) {
             state.camera.pos.x -= state.camera.dir.x * movespeed;
             state.camera.pos.y -= state.camera.dir.y * movespeed;
+        }
+
+        if (keystate[SDL_SCANCODE_ESCAPE]) {
+            state.quit = true;
         }
 
         memset(state.pixels, 0, sizeof(state.pixels));
