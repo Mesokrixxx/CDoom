@@ -38,10 +38,10 @@ static void verline(int x, int y0, int y1, u32 color) {
 
 static void render() {
     for (int x = 0; x < SCREEN_WIDTH; x++) {
-        // x coordinate in space from [-1, 1]
+        // X coordinate in space from [-1, 1]
         const f32 xcam = (2 * (x / (f32) (SCREEN_WIDTH))) - 1;
 
-        // ray direction through this column
+        // Ray direction through this column
         const Vec2 dir = {
             state.camera.dir.x + state.camera.plane.x * xcam,
             state.camera.dir.y + state.camera.plane.y * xcam
@@ -50,19 +50,19 @@ static void render() {
         Vec2 pos = state.camera.pos;
         Vec2i ipos = { (int) pos.x, (int) pos.y };
         
-        // distance ray must travel from one x/y side to the next
+        // Distance ray must travel from one x/y side to the next
         const Vec2 deltadist = {
             fabsf(dir.x) < 1e-20 ? 1e30 : fabsf(1.0f / dir.x),
             fabsf(dir.y) < 1e-20 ? 1e30 : fabsf(1.0f / dir.y),
         };
         
-        // distance from start position to first x/y side
+        // Distance from start position to first x/y side
         Vec2 sidedist = {
             deltadist.x * (dir.x < 0 ? (pos.x - ipos.x) : (ipos.x + 1 - pos.x)),
             deltadist.y * (dir.y < 0 ? (pos.y - ipos.y) : (ipos.y + 1 - pos.y)),
         };
         
-        // integer step direction for x/y, calculated from overall diff
+        // Integer step direction for x/y, calculated from overall diff
         const Vec2i step = { (int) sign(dir.x), (int) sign(dir.y) };
         
         // DDA hit
@@ -98,7 +98,7 @@ static void render() {
             case 4: color = 0xFFFF00FF; break;
         }
         
-        // darken colors on y-sides
+        // Darken colors on y-sides
         if (hit.side == 1) {
             const u32
                 br = ((color & 0xFF00FF) * 0xC0) >> 8,
@@ -109,14 +109,14 @@ static void render() {
         
         hit.pos = (Vec2) { pos.x + sidedist.x, pos.y + sidedist.y };
         
-        // distance to hit
+        // Distance to hit
         const f32 dperp =
             hit.side == 0 ?
                 (sidedist.x - deltadist.x)
                 : (sidedist.y - deltadist.y);
 
-        // perform perspective division, calculate line height relative to
-        // screen center
+        // Perform perspective division
+        // Calculate line height relative to screen center
         const int
             h = (int) (SCREEN_HEIGHT / dperp),
             y0 = max((SCREEN_HEIGHT / 2) - (h / 2), 0),
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
 
     state.window =
         SDL_CreateWindow(
-            "Test",
+            "C DOOM",
             SDL_WINDOWPOS_CENTERED_DISPLAY(1), SDL_WINDOWPOS_CENTERED_DISPLAY(1),
             1280, 720,
             SDL_WINDOW_ALLOW_HIGHDPI);

@@ -31,7 +31,7 @@ typedef struct Vec2i_s { i32 x, y; } Vec2i;
 #define min(a, b) ({ __typeof__(a) _a = (a), _b = (b); _a < _b ? _a : _b; })
 #define max(a, b) ({ __typeof__(a) _a = (a), _b = (b); _a > _b ? _a : _b; })
 
-#define sign(a) 
+#define sign(a)			\
 	({ __typeof__(a) _a = (a); (__typeof__(a))(_a < 0 ? -1 : (_a > 0 ? 1 : 0)); })
 
 # endif
