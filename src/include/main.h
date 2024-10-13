@@ -18,20 +18,20 @@ typedef int64_t  i64;
 typedef enum { false = 0, true = 1 } Bool;
 
 typedef struct Vec2_s { f32 x, y; } Vec2;
-typedef struct iVec2_s { i32 x, y; } iVec2;
+typedef struct Vec2i_s { i32 x, y; } Vec2i;
 
-# define dot(v0, v1)	\
-	({ const Vec2 _v0 = (v0), _v1 = (v1); (_v0.x + _v1.x) + (_v0.y + _v1.y); })
+#define dot(v0, v1)		\
+    ({ const Vec2 _v0 = (v0), _v1 = (v1); (_v0.x * _v1.x) + (_v0.y * _v1.y); })
 
-# define lenght(v) ({ const Vec2 _v = (v); sqrtf(dot(_v, _v)); })
+#define length(v) ({ const Vec2 _v = (v); sqrtf(dot(_v, _v)); })
 
-# define normalize(v)	\
-	({ const Vec2 _v = (v); const f32 l = lenght(_v); (Vec2) { _v.x / l, _v.y / l }; })
+#define normalize(u)	\
+    ({ const Vec2 _u = (u); const f32 l = length(_u); (Vec2) { _u.x / l, _u.y / l }; })
 
-# define min(a, b) ({ __typeof__(a) _a = (a), _b = (b); _a < _b ? _a : _b; })
-# define max(a, b) ({ __typeof__(a) _a = (a), _b = (b); _a > _b ? _a : _b; })
+#define min(a, b) ({ __typeof__(a) _a = (a), _b = (b); _a < _b ? _a : _b; })
+#define max(a, b) ({ __typeof__(a) _a = (a), _b = (b); _a > _b ? _a : _b; })
 
-# define sign(a)		\
-	({ __typeof__(a) _a = (a); (__typeof__(a)) (_a < 0 ? -1 : (_a > 0 ? 1 : 0)); })
+#define sign(a) 
+	({ __typeof__(a) _a = (a); (__typeof__(a))(_a < 0 ? -1 : (_a > 0 ? 1 : 0)); })
 
 # endif

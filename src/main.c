@@ -31,8 +31,9 @@ struct {
 } state;
 
 static void verline(int x, int y0, int y1, u32 color) {
-    for (int y = y0; y < y1; y++)
+    for (int y = y0; y <= y1; y++) {
         state.pixels[(y * SCREEN_WIDTH) + x] = color;
+    }
 }
 
 static void render() {
@@ -40,33 +41,33 @@ static void render() {
         // x coordinate in space from [-1, 1]
         const f32 xcam = (2 * (x / (f32) (SCREEN_WIDTH))) - 1;
 
-        // Ray direction through this column
+        // ray direction through this column
         const Vec2 dir = {
             state.camera.dir.x + state.camera.plane.x * xcam,
             state.camera.dir.y + state.camera.plane.y * xcam
         };
-
+        
         Vec2 pos = state.camera.pos;
-        iVec2 ipos = {(int) state.camera.pos.x, (int) state.camera.pos.y};
-
-        // Distance ray must travel from one x/y side to the next
+        Vec2i ipos = { (int) pos.x, (int) pos.y };
+        
+        // distance ray must travel from one x/y side to the next
         const Vec2 deltadist = {
             fabsf(dir.x) < 1e-20 ? 1e30 : fabsf(1.0f / dir.x),
-            fabsf(dir.y) < 1e-20 ? 1e30 : fabsf(1.0f / dir.y)
+            fabsf(dir.y) < 1e-20 ? 1e30 : fabsf(1.0f / dir.y),
         };
-
+        
         // distance from start position to first x/y side
         Vec2 sidedist = {
             deltadist.x * (dir.x < 0 ? (pos.x - ipos.x) : (ipos.x + 1 - pos.x)),
-            deltadist.y * (dir.y < 0 ? (pos.y - ipos.y) : (ipos.y + 1 - pos.y))
+            deltadist.y * (dir.y < 0 ? (pos.y - ipos.y) : (ipos.y + 1 - pos.y)),
         };
-
-        // Integer step direction for x/y, calculated from overall diff
-        const iVec2 step = {(int) sign(dir.x), (int) sign(dir.y)};
-
+        
+        // integer step direction for x/y, calculated from overall diff
+        const Vec2i step = { (int) sign(dir.x), (int) sign(dir.y) };
+        
         // DDA hit
-        struct { int val, side; Vec2 pos; } hit = {0, 0, {0.0f, 0.0f}};
-    
+        struct { int val, side; Vec2 pos; } hit = { 0, 0, { 0.0f, 0.0f } };
+        
         while (!hit.val) {
             if (sidedist.x < sidedist.y) {
                 sidedist.x += deltadist.x;
@@ -87,38 +88,39 @@ static void render() {
 
             hit.val = MAPDATA[ipos.y * MAP_SIZE + ipos.x];
         }
-
+        
         u32 color;
-
+        
         switch (hit.val) {
             case 1: color = 0xFF0000FF; break;
             case 2: color = 0xFF00FF00; break;
             case 3: color = 0xFFFF0000; break;
             case 4: color = 0xFFFF00FF; break;
         }
-
+        
         // darken colors on y-sides
         if (hit.side == 1) {
             const u32
                 br = ((color & 0xFF00FF) * 0xC0) >> 8,
                 g  = ((color & 0x00FF00) * 0xC0) >> 8;
-
+        
             color = 0xFF000000 | (br & 0xFF00FF) | (g & 0x00FF00);
         }
+        
+        hit.pos = (Vec2) { pos.x + sidedist.x, pos.y + sidedist.y };
+        
+        // distance to hit
+        const f32 dperp =
+            hit.side == 0 ?
+                (sidedist.x - deltadist.x)
+                : (sidedist.y - deltadist.y);
 
-        hit.pos = (Vec2) {pos.x + sidedist.x, pos.y + sidedist.y};
-
-        // Distance to hit
-        const f32 dperp = 
-            hit.side == 0 ? 
-                (sidedist.x - deltadist.x) : (sidedist.y - deltadist.y);
-    
-        // Perform perspective division
-        // calculate line height relative to screen center
-        const int 
-            height = (int) (SCREEN_HEIGHT / dperp),
-            y0 = max((SCREEN_HEIGHT / 2) - (height / 2), 0),
-            y1 = min((SCREEN_HEIGHT / 2) + (height / 2), SCREEN_HEIGHT - 1);
+        // perform perspective division, calculate line height relative to
+        // screen center
+        const int
+            h = (int) (SCREEN_HEIGHT / dperp),
+            y0 = max((SCREEN_HEIGHT / 2) - (h / 2), 0),
+            y1 = min((SCREEN_HEIGHT / 2) + (h / 2), SCREEN_HEIGHT - 1);
 
         verline(x, 0, y0, 0xFF202020);
         verline(x, y0, y1, color);
@@ -126,11 +128,11 @@ static void render() {
     }
 }
 
-static void rotate(f32 rot)
-{
+static void rotate(f32 rot) {
     const Vec2 d = state.camera.dir, p = state.camera.plane;
+    
     state.camera.dir.x = d.x * cos(rot) - d.y * sin(rot);
-    state.camera.dir.y = d.y * cos(rot) - d.x * sin(rot);
+    state.camera.dir.y = d.x * sin(rot) + d.y * cos(rot);
     state.camera.plane.x = p.x * cos(rot) - p.y * sin(rot);
     state.camera.plane.y = p.x * sin(rot) + p.y * cos(rot);
 }
@@ -175,8 +177,8 @@ int main(int argc, char *argv[]) {
         }
 
         const f32
-            rotspeed = 3.0f * 0.016f,
-            movespeed = 3.0f * 0.016f;
+            rotspeed = 1.5f * 0.016f,
+            movespeed = 1.5f * 0.016f;
 
         const u8 *keystate = SDL_GetKeyboardState(NULL);
         
